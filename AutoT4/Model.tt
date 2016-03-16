@@ -1,0 +1,51 @@
+﻿<#@ template  hostspecific="true" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Data" #>
+<#@ assembly name="System.Data.DataSetExtensions" #>
+<#@ assembly name="System.Xml" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.Xml" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Data" #>
+<#@ import namespace="System.Data.SqlClient" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.IO" #>
+<#@ include file="$(ProjectDir)DbHelper.ttinclude"  #>
+<#@include file="Manager.ttinclude"#>
+<# var manager = Manager.Create(Host, GenerationEnvironment); #>
+<#@ output extension=".cs" #>
+//------------------------------------------------------------------------------
+//     此代码由T4模板自动生成
+//     生成时间 <#=DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")#> 
+//     对此文件的更改可能会导致不正确的行为，并且如果 重新生成代码，这些更改将会丢失。
+//    创建者：ZTB
+//------------------------------------------------------------------------------
+
+   
+ <#List<DbTable> tables=DbHelper.GetDbTables(Config.ConnectionString, Config.DbDatabase,null);
+    foreach(var item in tables)
+{#>
+<#manager.StartNewFile(item.TableName+".cs"); #>
+using System;
+namespace Model
+{ 
+ public class <#=item.TableName#>
+    {<# foreach(DbColumn column in DbHelper.GetDbColumns(Config.ConnectionString, Config.DbDatabase,item.TableName,"dbo")){#>        
+         /// <summary>
+        /// <#=column.Remark#>
+        /// </summary>        
+        public <#= column.CSharpType#><# if(column.CommonType.IsValueType && column.IsNullable){#>?<#}#> <#=column.ColumnName#> { get; set; }<#}#> 
+    }
+}
+ <# manager.EndBlock(); #>
+<#}
+
+#>
+<# manager.Process(true); #>
+<#+
+    public class Config
+    {
+        public static readonly string ConnectionString="Data Source=(local);Integrated Security=true;Initial Catalog=lmz;";
+        public static readonly string DbDatabase="LMZ";
+    }
+#>
